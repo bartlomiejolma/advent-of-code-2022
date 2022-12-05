@@ -5,7 +5,6 @@ fn split_rucksacks(line: &str) -> (&str, &str) {
 }
 
 fn common_items(rucksacks: Vec<&str>) -> char {
-
     rucksacks
         .into_iter()
         .map(str::chars)
@@ -34,6 +33,21 @@ pub fn total_score(text: &str) -> u32 {
     text.lines()
         .map(str::trim)
         .map(line_score)
+        .reduce(u32::wrapping_add)
+        .unwrap()
+}
+
+fn block_score(block: Vec<&str>) -> u32 {
+    score(common_items(block))
+}
+
+pub fn total_score_2(text: &str) -> u32 {
+    text.lines()
+        .map(str::trim)
+        .collect::<Vec<&str>>()
+        .chunks(3)
+        .map(Vec::from)
+        .map(block_score)
         .reduce(u32::wrapping_add)
         .unwrap()
 }
@@ -153,6 +167,25 @@ CrZsJsPPZsGzwwsLwLmpwMDw";
         let expected_score = 157;
         // When
         let actual_score = total_score(lines);
+
+        // Then
+        assert_eq!(expected_score, actual_score)
+    }
+
+    #[test]
+    fn test_total_score_2() {
+        // Given
+
+        let lines = "vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw";
+
+        let expected_score = 70;
+        // When
+        let actual_score = total_score_2(lines);
 
         // Then
         assert_eq!(expected_score, actual_score)
