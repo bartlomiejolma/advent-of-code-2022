@@ -4,15 +4,22 @@ fn split_rucksacks(line: &str) -> (&str, &str) {
     line.split_at(line.len() / 2)
 }
 
-fn common_items(rucksacks: (&str, &str)) -> char {
-    let first: HashSet<char, RandomState> = HashSet::from_iter(rucksacks.0.chars());
-    let second = HashSet::from_iter(rucksacks.1.chars());
+fn common_items(rucksacks: Vec<&str>) -> char {
 
-    first.intersection(&second).last().unwrap().clone()
+    rucksacks
+        .into_iter()
+        .map(str::chars)
+        .map(|x| HashSet::from_iter(x))
+        .reduce(|first: HashSet<char, RandomState>, second| {
+            HashSet::from_iter(first.intersection(&second).into_iter().map(Clone::clone))
+        })
+        .unwrap()
+        .into_iter()
+        .collect::<Vec<char>>()[0]
 }
 
 fn score(letter: char) -> u32 {
-    if (letter.is_lowercase()) {
+    if letter.is_lowercase() {
         letter as u32 - 96
     } else {
         letter as u32 - 38
@@ -20,7 +27,8 @@ fn score(letter: char) -> u32 {
 }
 
 fn line_score(line: &str) -> u32 {
-    score(common_items(split_rucksacks(line)))
+    let splitted = split_rucksacks(line);
+    score(common_items(Vec::from([splitted.0, splitted.1])))
 }
 pub fn total_score(text: &str) -> u32 {
     text.lines()
@@ -53,7 +61,7 @@ mod test {
     fn test_common_items() {
         // Given
 
-        let rucksacks = ("vJrwpWtwJgWr", "hcsFMMfFFhFp");
+        let rucksacks = Vec::from(["vJrwpWtwJgWr", "hcsFMMfFFhFp"]);
 
         let expected_common = 'p';
         // When
@@ -66,7 +74,7 @@ mod test {
     fn test_common_items_2() {
         // Given
 
-        let rucksacks = ("jqHRNqRjqzjGDLGL", "rsFMfFZSrLrFZsSL");
+        let rucksacks = Vec::from(["jqHRNqRjqzjGDLGL", "rsFMfFZSrLrFZsSL"]);
 
         let expected_common = 'L';
         // When
@@ -80,7 +88,7 @@ mod test {
     fn test_common_items_3() {
         // Given
 
-        let rucksacks = ("PmmdzqPrV", "vPwwTWBwg");
+        let rucksacks = Vec::from(["PmmdzqPrV", "vPwwTWBwg"]);
 
         let expected_common = 'P';
         // When
